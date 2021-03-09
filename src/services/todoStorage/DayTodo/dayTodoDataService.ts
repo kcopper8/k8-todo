@@ -1,5 +1,5 @@
 import { DayTodo, NoteId } from "../../type";
-import { createNote, getNote, getNotes, updateNote } from "../client";
+import { createNote, findNote, getNote, updateNote } from "../client";
 import { DAY_TODO_FOLDER_ID } from "../constants";
 import { parseDayTodoBody, serializeDayTodoBody } from "./dayTodoDataHelper";
 
@@ -34,11 +34,16 @@ export const createDayTodo = async (
 export const findDayTodoId = async (
   dayTodoTitle: string
 ): Promise<NoteId | undefined> => {
-  const notes = await getNotes({
-    parent_id: DAY_TODO_FOLDER_ID,
-  });
-
-  return notes.find((note) => note.title === dayTodoTitle)?.id;
+  return (
+    await findNote(
+      (note) =>
+        note.title === dayTodoTitle && note.parent_id === DAY_TODO_FOLDER_ID,
+      {
+        order_by: "title",
+        order_dir: "ASC",
+      }
+    )
+  )?.id;
 };
 
 /**

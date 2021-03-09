@@ -154,3 +154,34 @@ export async function getNotes(criteria: Criteria = {}): Promise<RawNote[]> {
 
   return items;
 }
+
+export async function findNote(
+  filter: (note: RawNote) => boolean,
+  sorting: {
+    order_by?: keyof RawNote;
+    order_dir?: "ASC" | "DESC";
+  } = {}
+): Promise<RawNote | undefined> {
+  let page = 0;
+
+  let result: JoplinItemListResult<RawNote>;
+
+  do {
+    result = (
+      await axios.get(`${await loadJoplinHost()}/notes`, {
+        params: {
+          token: await loadJoplinToken(),
+          fields: "id,parent_id,title,is_todo,todo_completed,body",
+          limit: 100,
+          page: page++,
+          ...sorting,
+        },
+      })
+    ).data;
+
+    const rowNote = result.items.find(filter);
+    if (rowNote) {
+      return rowNote;
+    }
+  } while (result.has_more);
+}
