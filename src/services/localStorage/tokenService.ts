@@ -1,3 +1,7 @@
+export const checkConnection = async (): Promise<boolean> => {
+  return !!(await loadHost()) && !!(await loadToken());
+};
+
 export const loadToken = async (): Promise<string | undefined> => {
   return globalThis.localStorage.token;
 };
