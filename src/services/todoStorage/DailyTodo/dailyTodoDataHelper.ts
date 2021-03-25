@@ -28,6 +28,7 @@ export const parseDailySingleTasks = (body: string): DailySingleTask[] => {
   return taskBody
     .trim()
     .split("\n")
+    .filter((body) => body)
     .map((line) => {
       const task = parseTaskLine(line);
       const dayTodoLink = parseLink(task.title);

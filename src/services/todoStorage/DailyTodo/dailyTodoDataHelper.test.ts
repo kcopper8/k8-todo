@@ -5,6 +5,11 @@ import {
 } from "./dailyTodoDataHelper";
 
 describe("parseDailySingleTasks", () => {
+  describe("when body is empty", () => {
+    const tasks = parseDailySingleTasks("");
+    expect(tasks).toEqual([]);
+  });
+
   describe("when body has no meta", () => {
     it("parses", () => {
       const tasks = parseDailySingleTasks(`- [x] [2021-01-07](:/0d2e8a15b5494a7c95877cb366aee24f)
