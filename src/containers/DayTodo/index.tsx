@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from "react-query";
+import { DayTodoLayoutComponent } from "../../components/modules/DayTodoLayout";
 import { getDayTodo, refreshDayTodo } from "../../services/todo";
 import { DailyTodo } from "../DailyTodo";
 import { OneTimeTodo } from "../OneTimeTodo";
@@ -19,28 +20,18 @@ const DayTodoComponent: React.FC<Props> = ({ todoDay }) => {
     queryClient.invalidateQueries(["dayTodo", todoDay]);
   };
   return (
-    <article>
-      <section>
-        {dayTodo?.totalPoint} point{" "}
-        <button onClick={handleRefreshDayTodo}>refresh</button>
-      </section>
-      <div>
-        <h2>Todo</h2>
-        {dayTodo?.todos.map((todo) => {
-          return (
-            <OneTimeTodo key={todo.id} todo={todo} todoDay={dayTodo.title} />
-          );
-        })}
-      </div>
-      <div>
-        <h2>DailyTodo</h2>
-        {dayTodo?.dailyTodos.map((todo) => {
-          return (
-            <DailyTodo key={todo.id} todo={todo} todoDay={dayTodo.title} />
-          );
-        })}
-      </div>
-    </article>
+    <DayTodoLayoutComponent
+      totalPoint={dayTodo?.totalPoint}
+      onClickRefresh={handleRefreshDayTodo}
+      oneTimeTodos={dayTodo?.todos.map((todo) => {
+        return (
+          <OneTimeTodo key={todo.id} todo={todo} todoDay={dayTodo.title} />
+        );
+      })}
+      dailyTodos={dayTodo?.dailyTodos.map((todo) => {
+        return <DailyTodo key={todo.id} todo={todo} todoDay={dayTodo.title} />;
+      })}
+    />
   );
 };
 

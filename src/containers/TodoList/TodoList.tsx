@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { useQuery } from "react-query";
+import { SupportDaysComponent } from "../../components/modules/SupportDays";
 import { checkConnection } from "../../services/localStorage/tokenService";
 import { getSupportDays } from "../../services/todo";
 import { TodoDay } from "../../services/type";
@@ -17,18 +18,14 @@ export function TodoList() {
   return (
     <>
       {showTokenInput && <TokenInput />}
-      {!showTokenInput && (
+      {!showTokenInput && supportDays.data && (
         <>
-          <section>
-            {supportDays.data?.map((todoDay) => {
-              return (
-                <button key={todoDay} onClick={() => setTodoDay(todoDay)}>
-                  {todoDay}
-                </button>
-              );
-            })}
-            <h1>{todoDay}</h1>
-          </section>
+          <SupportDaysComponent
+            supportDays={supportDays.data}
+            onClickSupportDay={setTodoDay}
+            currentDay={todoDay}
+          />
+
           <DayTodo todoDay={todoDay} />
         </>
       )}

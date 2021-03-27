@@ -1,6 +1,6 @@
 import { ChangeEvent } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import { Loading } from "../../components/Loading";
+import { OneTimeTodoComponent } from "../../components/modules/OneTimeTodo";
 import { setCompleteOfOneTimeTodo } from "../../services/todo";
 import { Todo } from "../../services/type";
 
@@ -30,11 +30,11 @@ export const OneTimeTodo = ({
   };
 
   return (
-    <div>
-      <Loading loading={mutation.isLoading}>
-        <input type="checkbox" checked={completed} onChange={handleChange} />
-      </Loading>
-      {title}
-    </div>
+    <OneTimeTodoComponent
+      isLoading={mutation.isLoading}
+      completed={completed}
+      onChange={handleChange}
+      title={title}
+    />
   );
 };
