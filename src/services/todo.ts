@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
-import { getNotes } from "./todoStorage/client";
-import { ONE_TIME_TODO_FOLDER_ID } from "./todoStorage/constants";
+import tableize from "../utils/tableize";
 import { getAllDailyTodos } from "./todoStorage/DailyTodo/dailyTodoDataService";
 import {
   createDayTodo,
@@ -8,7 +7,8 @@ import {
   getDayTodo as getDayTodoDataService,
   saveDayTodo,
 } from "./todoStorage/DayTodo/dayTodoDataService";
-import { DayTodo, isDailySingleTaskTodo, NoteId, TodoDay } from "./type";
+import { getOneTimeTodos } from "./todoStorage/OneTimeTodo/oneTimeTodoDataService";
+import { DayTodo, isDailySingleTaskTodo, NoteId, Todo, TodoDay } from "./type";
 
 type DayTitle = string;
 
@@ -42,24 +42,12 @@ const updateDayTodo = async (dayTodo: DayTodo) => {
 };
 
 const makeDayTodoObj = async (title: TodoDay) => {
-  const todos = await getNotes({
-    parent_id: ONE_TIME_TODO_FOLDER_ID,
-    is_todo: true,
-    is_completed: false,
-  });
-
   const dailyTodos = await getAllDailyTodos();
 
   const dayTodo: DayTodo = {
     title: title,
     completed: false,
-    todos: todos.map((todo) => ({
-      id: todo.id,
-      completed: todo.todo_completed > 0,
-      etc: "",
-      title: todo.title,
-      tasks: [],
-    })),
+    todos: await getOneTimeTodos(),
     dailyTodos: dailyTodos.map((todo) => ({
       id: todo.id,
       completed: false,
@@ -86,6 +74,49 @@ export const getDayTodo: (todoDay: TodoDay) => Promise<DayTodo> = async (
   }
 
   return await getDayTodoDataService(dayTodoId);
+};
+
+export const refreshDayTodo = async (todoDay: TodoDay): Promise<void> => {
+  let dayTodoId = await findDayTodoId(todoDay);
+  if (!dayTodoId) {
+    throw new Error("no dayTodo for todoDay");
+  }
+
+  const oneTimeTodos = await getOneTimeTodos();
+
+  const dayTodo = await getDayTodoDataService(dayTodoId);
+
+  const todoTable = tableize(oneTimeTodos, dayTodo.todos, (a, b) => {
+    return a.id === b.id ? 0 : a.id < b.id ? -1 : 1;
+  });
+
+  const newTodos = todoTable
+    .map(([oneTime, day]) => {
+      if (!oneTime && day) {
+        // completed at other place
+        return {
+          ...day,
+          completed: true,
+        };
+      } else if (oneTime && !day) {
+        // new
+        return {
+          ...oneTime,
+        };
+      } else if (oneTime && day) {
+        return {
+          ...day,
+        };
+      } else {
+        return undefined;
+      }
+    })
+    .filter((v) => v) as Todo[];
+
+  await updateDayTodo({
+    ...dayTodo,
+    todos: newTodos,
+  });
 };
 
 export const getSupportDays = (): string[] => {

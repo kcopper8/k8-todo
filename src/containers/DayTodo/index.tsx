@@ -1,5 +1,5 @@
-import { useQuery } from "react-query";
-import { getDayTodo } from "../../services/todo";
+import { useQuery, useQueryClient } from "react-query";
+import { getDayTodo, refreshDayTodo } from "../../services/todo";
 import { DailyTodo } from "../DailyTodo";
 import { OneTimeTodo } from "../OneTimeTodo";
 
@@ -12,7 +12,12 @@ const DayTodoComponent: React.FC<Props> = ({ todoDay }) => {
     return getDayTodo(todoDay);
   });
 
-  const handleRefreshDayTodo = () => {};
+  const queryClient = useQueryClient();
+
+  const handleRefreshDayTodo = async () => {
+    await refreshDayTodo(todoDay);
+    queryClient.invalidateQueries(["dayTodo", todoDay]);
+  };
   return (
     <article>
       <section>
